@@ -22,6 +22,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,7 +40,7 @@ import butterknife.Bind;
     public class LoginActivity extends AppCompatActivity  {
         private static final String TAG = "LoginActivity";
         private static final int REQUEST_SIGNUP = 0;
-        private static final String REGISTER_URL = "http://shark-mobile1990.000webhostapp.com/cafeteria/BOOKS/login.php";
+        private static final String REGISTER_URL = "http://shark-mobile1990.000webhostapp.com/cafeteria/Riverdale/login.php";
 
         @Bind(R.id.input_email)
         EditText _emailText;
@@ -50,6 +56,9 @@ import butterknife.Bind;
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_login);
             ButterKnife.bind(this);
+
+            FirebaseMessaging.getInstance().subscribeToTopic("info");
+            FirebaseInstanceId.getInstance().getToken();
 
             _loginButton.setOnClickListener(new View.OnClickListener() {
 
@@ -80,7 +89,7 @@ import butterknife.Bind;
                 return;
             }
             if(!Utility.isNetworkAvailable(getApplicationContext())){
-
+                Toast.makeText(getApplicationContext(),"No Internet Connection",Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -188,17 +197,43 @@ import butterknife.Bind;
                 @Override
                 protected void onPostExecute(String s) {
                     super.onPostExecute(s);
-
                     progressDialog.dismiss();
-                    if (s.equalsIgnoreCase("user login")){
-                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        startActivity(intent);
+                    try {
+                        JSONObject jObj = new JSONObject(s);
+                        String status = jObj.getString("status");
+                        String name = jObj.getString("name");
+                        String code = jObj.getString("code");
+
+                        if (status.equalsIgnoreCase("1")){
+                            Toast.makeText(getApplicationContext(),"Login Failed",Toast.LENGTH_LONG).show();
+                            onLoginFailed();
+
+                        }
+                        else if(status.equalsIgnoreCase("2")) {
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            intent.putExtra("name",name);
+                            intent.putExtra("code",code);
+                            startActivity(intent);
+                            Toast.makeText(getApplicationContext(),"user login",Toast.LENGTH_LONG).show();
+                        }
+
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplicationContext(),"Server error",Toast.LENGTH_LONG).show();
+                        _loginButton.setEnabled(true);
                     }
-                    else {
-                        onLoginFailed();
-                        s = "login failed";
-                    }
-                    Toast.makeText(getApplicationContext(),s,Toast.LENGTH_LONG).show();
+
+//                    progressDialog.dismiss();
+//                    if (s.equalsIgnoreCase("user login")){
+//                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+//                        intent.putExtra("name","smith");
+//                        intent.putExtra("code","123456");
+//                        startActivity(intent);
+//                    }
+//                    else {
+//                        onLoginFailed();
+//                        s = "login failed";
+//                    }
+//                    Toast.makeText(getApplicationContext(),s,Toast.LENGTH_LONG).show();
                 }
 
                 @Override
@@ -220,7 +255,13 @@ import butterknife.Bind;
             ru.execute(phoneNumber,password);
         }
 
-
+        @Override
+        protected void onResume() {
+            super.onResume();
+            _loginButton.setEnabled(true);
+            _emailText.setText("");
+            _passwordText.setText("");
+        }
     }
 
 

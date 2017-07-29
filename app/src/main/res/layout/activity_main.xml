@@ -6,10 +6,34 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
+
     tools:context=".MainActivity">
 
-    <TextView android:text="welcome"
+    <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_above="@+id/ivBarcode"
+        android:textColor="#000000"
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tvText"
+        android:text="barcode for"
+        android:layout_marginBottom="20dp"/>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivBarcode"
+        android:layout_centerInParent="true"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ivBarcode"
+        android:layout_centerHorizontal="true"
+        tools:text="12334234234"
+        android:textSize="25sp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/tvNumber"
+        android:textColor="#000000"/>
 
 </RelativeLayout>

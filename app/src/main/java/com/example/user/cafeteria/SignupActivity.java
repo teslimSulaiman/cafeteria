@@ -18,6 +18,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,7 +30,7 @@ import butterknife.Bind;
 
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";
-    private static final String REGISTER_URL = "http://shark-mobile1990.000webhostapp.com/cafeteria/BOOKS/signup.php";
+    private static final String REGISTER_URL = "http://shark-mobile1990.000webhostapp.com/cafeteria/Riverdale/signup.php";
 
 
     @Bind(R.id.input_name) EditText _nameText;
@@ -174,14 +178,6 @@ public class SignupActivity extends AppCompatActivity {
         return valid;
     }
 
-//    private void registerUser() {
-//        String name = editTextName.getText().toString().trim().toLowerCase();
-//        String username = editTextUsername.getText().toString().trim().toLowerCase();
-//        String password = editTextPassword.getText().toString().trim().toLowerCase();
-//        String email = editTextEmail.getText().toString().trim().toLowerCase();
-//
-//        register(name,phonenumber,password);
-//    }
 
     private void register(String name, String phoneNumber, String password) {
         class RegisterUser extends AsyncTask<String, Void, String> {
@@ -205,15 +201,27 @@ public class SignupActivity extends AppCompatActivity {
                 super.onPostExecute(s);
                 progressDialog.dismiss();
                 //loading.dismiss();
-                if (s.equalsIgnoreCase("user already exist")){
 
+                try {
+                    JSONObject jObj = new JSONObject(s);
+                    String status = jObj.getString("status");
+                    String phoneNumber = jObj.getString("phoneNumber");
+
+                    if (status.equalsIgnoreCase("1")){
+                        Toast.makeText(getApplicationContext(),"user already exist",Toast.LENGTH_LONG).show();
                     onSignupFailed();
-                    Toast.makeText(getApplicationContext(),"user already exist",Toast.LENGTH_LONG).show();
-                }
-                else {
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+
+                    }
+                    else if(status.equalsIgnoreCase("2")) {
+                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        //intent.putExtra("phoneNumber",phoneNumber);
                     startActivity(intent);
                     Toast.makeText(getApplicationContext(),"sign up successful",Toast.LENGTH_LONG).show();
+                     }
+
+                } catch (JSONException e) {
+                    Toast.makeText(getApplicationContext(),"Server error",Toast.LENGTH_LONG).show();
+                    _signupButton.setEnabled(true);
                 }
 
             }
