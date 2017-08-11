@@ -57,7 +57,7 @@ import butterknife.Bind;
             setContentView(R.layout.activity_login);
             ButterKnife.bind(this);
 
-            FirebaseMessaging.getInstance().subscribeToTopic("info");
+            FirebaseMessaging.getInstance().subscribeToTopic("test");
             FirebaseInstanceId.getInstance().getToken();
 
             _loginButton.setOnClickListener(new View.OnClickListener() {
@@ -203,6 +203,7 @@ import butterknife.Bind;
                         String status = jObj.getString("status");
                         String name = jObj.getString("name");
                         String code = jObj.getString("code");
+                        String phoneNumber = jObj.getString("phoneNumber");
 
                         if (status.equalsIgnoreCase("1")){
                             Toast.makeText(getApplicationContext(),"Login Failed",Toast.LENGTH_LONG).show();
@@ -213,6 +214,7 @@ import butterknife.Bind;
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             intent.putExtra("name",name);
                             intent.putExtra("code",code);
+                            intent.putExtra("phoneNumber",phoneNumber);
                             startActivity(intent);
                             Toast.makeText(getApplicationContext(),"user login",Toast.LENGTH_LONG).show();
                         }

@@ -1,10 +1,14 @@
 package com.example.user.cafeteria;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.location.LocationManager;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -19,6 +23,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,18 +44,20 @@ import butterknife.ButterKnife;
 
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener,
+        SharedPreferences.OnSharedPreferenceChangeListener{
 
 
     //    @Bind(R.id.get_barcode)
 //    Button getBarcodeButton;
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 111;
+    private static final String TAG = "main";
     @Bind(R.id.tvNumber)
     TextView tvNumber;
 
     @Bind(R.id.ivBarcode)
     ImageView ivBarcode;
-
+    String codeNumber;
     @Bind(R.id.tvText)
     TextView tvText;
     private final String LOG_TAG = "Cafeteria";
@@ -174,7 +181,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        Intent intent = getIntent();
+        if (intent != null) {
+             codeNumber = intent.getStringExtra("phoneNumber");
+        }
+
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            String phoneNumber = getIntent().getStringExtra("phoneNumber");
+            Intent intent = new Intent(getApplicationContext(), ChangePassword.class);
+            intent.putExtra("phoneNumber",phoneNumber);
+            Log.d(TAG, "onOptionsItemSelected: "+phoneNumber);
+            startActivity(intent);
+            return true;
+        }
+        if (id == R.id.action_contact) {
+            Intent intent = new Intent(getApplicationContext(), Contact.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -184,6 +216,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(10); // Update location every second
 
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            Toast.makeText(this, "First enable LOCATION ACCESS in settings.", Toast.LENGTH_LONG).show();
+            return;
+        }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
@@ -205,7 +243,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.i(LOG_TAG, location.toString());
         //txtOutput.setText(location.toString());
 
-        tvNumber.setText(Double.toString(location.getLatitude()));
+       // tvNumber.setText(Double.toString(location.getLongitude()));
+        setLocationStatus(this, location.getLatitude());
     }
 
 
@@ -224,4 +263,31 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onStop();
         Log.i(LOG_TAG, "stopped");
     }
+    @Override
+    public void onResume() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        sp.registerOnSharedPreferenceChangeListener(this);
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        sp.unregisterOnSharedPreferenceChangeListener(this);
+        super.onPause();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+
+    }
+    public void setLocationStatus(Context c, double lat){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+        if(lat > 4.0) {
+            SharedPreferences.Editor spe = sp.edit();
+            spe.putLong(c.getString(R.string.pref_location_key), Double.doubleToRawLongBits(lat));
+            spe.apply();
+        }
+    }
+
 }

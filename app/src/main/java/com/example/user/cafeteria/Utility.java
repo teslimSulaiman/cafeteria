@@ -100,4 +100,9 @@ public class Utility {
         return activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
     }
+
+    static public String HIGH_SCHOOL = "sarSchool";
+    static public String ACADEMY_HIGH_SCHOOL  = "academySchool";
+    static public String ADDRESS_HIGH_SCHOOL = "SAR High School 503 W. 259th st, Bronx NY";
+    static public String ADDRESS_ACADEMY_SCHOOL = "North Shore Hebrew Academy High School 400 N. Service Rd Lake Success, NY";
 }

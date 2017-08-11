@@ -1,8 +1,9 @@
 <resources>
-    <string name="app_name">Cafeteria</string>
-
+    <string name="app_name">Riverdale Kosher</string>
 
 
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Change Password</string>
+    <string name="title_activity_info">Riverdale Kosher</string>
+    <string name="pref_location_key">location</string>
 </resources>
